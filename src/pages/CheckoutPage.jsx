@@ -140,7 +140,7 @@ export function CheckoutPage() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             service_id: import.meta.env.VITE_EMAILJS_SERVICE_ID,
-            template_id: import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
+            template_id: import.meta.env.EMAILJS_TEMPLATE_ID || import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
             user_id: import.meta.env.VITE_EMAILJS_PUBLIC_KEY,
             template_params: {
               to_email: shipping.email,
