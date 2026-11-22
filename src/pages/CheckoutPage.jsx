@@ -135,12 +135,21 @@ export function CheckoutPage() {
 
       // Send order confirmation email
       try {
+        const templateId = import.meta.env.EMAILJS_ORDER_TEMPLATE_ID || import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
+        
+        console.log('Email Debug:', {
+          service_id: import.meta.env.VITE_EMAILJS_SERVICE_ID,
+          template_id: templateId,
+          user_id: import.meta.env.VITE_EMAILJS_PUBLIC_KEY ? 'present' : 'missing',
+          to_email: shipping.email
+        });
+
         const response = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             service_id: import.meta.env.VITE_EMAILJS_SERVICE_ID,
-            template_id: import.meta.env.EMAILJS_ORDER_TEMPLATE_ID,
+            template_id: templateId,
             user_id: import.meta.env.VITE_EMAILJS_PUBLIC_KEY,
             template_params: {
               to_email: shipping.email,
@@ -154,12 +163,16 @@ export function CheckoutPage() {
           })
         });
 
+        const responseData = await response.json();
+        console.log('Email response:', responseData);
+
         if (!response.ok) {
-          console.warn('Email notification failed, but order was created');
+          console.error('Email notification failed:', responseData);
+        } else {
+          console.log('✅ Email sent successfully!');
         }
       } catch (emailErr) {
-        console.warn('Could not send email notification:', emailErr);
-        // Don't fail the order if email fails
+        console.error('Email error:', emailErr);
       }
 
       setOrderData({ ...order, tracking_number: tracking });
