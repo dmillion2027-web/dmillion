@@ -1,17 +1,23 @@
 import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import heroBackground from '../../assets/images/D919CFF6-4388-4F76-A2F7-8179BC8C129D.webp';
 
 export function Hero() {
+  const heroBackground = '/src/assets/images/D919CFF6-4388-4F76-A2F7-8179BC8C129D.webp';
+  
   return (
     <section className="relative min-h-[90vh] flex items-center overflow-hidden bg-[#3d2415]">
-      {/* Background Image with Overlay */}
+      {/* Background Image with Overlay - Optimized with lazy loading */}
       <div className="absolute inset-0">
         <img 
           src={heroBackground} 
           alt="One in a Million Luxury Bags" 
           className="w-full h-full object-cover opacity-90"
+          loading="eager"
+          decoding="async"
+          fetchpriority="high"
+          width="1920"
+          height="1080"
         />
         <div className="absolute inset-0 bg-black/30"></div>
       </div>
