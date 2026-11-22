@@ -133,50 +133,31 @@ export function CheckoutPage() {
         }
       }
 
-      // Send order confirmation email
+      // Send order confirmation email via Nodemailer/Gmail
       try {
-        // Try to get from environment, fallback to hardcoded values
-        const templateId = import.meta.env.EMAILJS_ORDER_TEMPLATE_ID || 'template_6er4mkn';
-        const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID || 'service_0dphftg';
-        const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY || '2CPqgqjZJeBh8LJ9L';
+        console.log('📧 Sending order confirmation email...');
         
-        console.log('📧 Sending order email...', {
-          templateId,
-          serviceId,
-          email: shipping.email
-        });
-
-        const payload = {
-          service_id: serviceId,
-          template_id: templateId,
-          user_id: publicKey,
-          template_params: {
-            to_email: shipping.email,
+        // Call backend API to send email
+        const emailResponse = await fetch('/api/send-order-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            to: shipping.email,
             customer_name: shipping.full_name,
             tracking_number: tracking,
             order_total: `$${total.toFixed(2)}`,
             shipping_address: `${shipping.address_line1}, ${shipping.city}, ${shipping.country}`,
             order_items: cartItems.map(item => `${item.name} x${item.quantity}`).join(', '),
             contact_email: 'support@dmillion.com',
-          }
-        };
-
-        console.log('📮 Email payload:', payload);
-
-        const response = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
+          })
         });
 
-        const responseText = await response.text();
-        console.log('📬 Email response status:', response.status);
-        console.log('📬 Email response:', responseText);
-
-        if (response.ok) {
-          console.log('✅ Email sent successfully!');
+        const emailData = await emailResponse.json();
+        
+        if (emailResponse.ok) {
+          console.log('✅ Order confirmation email sent successfully!', emailData);
         } else {
-          console.error('❌ Email failed:', responseText);
+          console.error('❌ Email failed:', emailData);
         }
       } catch (emailErr) {
         console.error('❌ Email error:', emailErr);
