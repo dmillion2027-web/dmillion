@@ -150,6 +150,26 @@ export function AdminDashboard({ user, onLogout }) {
       showToast(`Order updated to "${newStatus}"!`);
       // Optimistic update - update the full order with new status
       setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status: newStatus, updated_at: new Date().toISOString() } : o));
+      
+      // Send status update email to customer
+      try {
+        const order = orders.find(o => o.id === orderId);
+        if (order) {
+          await fetch('/api/send-order-status-email', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              to: order.customer_email,
+              customer_name: order.customer_name,
+              tracking_number: order.tracking_number,
+              new_status: newStatus,
+              order_total: order.total_amount
+            })
+          });
+        }
+      } catch (emailErr) {
+        console.error('Status email error:', emailErr);
+      }
     } catch (err) {
       console.error('Update error:', err);
       showToast('Failed to update order status', 'error');

@@ -102,6 +102,8 @@ export function CheckoutPage() {
           status: 'processing',
           total_amount: total,
           shipping_address: `${shipping.address_line1}, ${shipping.city}, ${shipping.country}`,
+          customer_email: shipping.email,
+          customer_name: shipping.full_name,
         }])
         .select()
         .single();
