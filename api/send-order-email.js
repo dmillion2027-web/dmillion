@@ -39,7 +39,9 @@ export default async function handler(req, res) {
         .content { padding: 20px 0; }
         .greeting { font-size: 16px; color: #333; margin-bottom: 15px; line-height: 1.6; }
         .section { margin-bottom: 30px; }
-        .section h2 { color: #1a1a1a; font-size: 18px; border-bottom: 1px solid #e8d5b7; padding-bottom: 10px; margin: 0 0 15px 0; }
+        .section-header { display: flex; align-items: center; gap: 10px; margin-bottom: 15px; }
+        .section-icon { width: 24px; height: 24px; background: #e8d5b7; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #1a1a1a; font-weight: bold; font-size: 14px; }
+        .section h2 { color: #1a1a1a; font-size: 18px; margin: 0; padding-bottom: 0; border-bottom: none; }
         .tracking-box { background: linear-gradient(135deg, #e8d5b7 0%, #d4c1a3 100%); padding: 25px; border-radius: 8px; text-align: center; margin: 15px 0; }
         .tracking-box p { margin: 0; color: #1a1a1a; font-weight: 600; }
         .tracking-box .number { font-size: 28px; font-weight: bold; font-family: 'Courier New', monospace; letter-spacing: 2px; margin: 10px 0; }
@@ -69,7 +71,10 @@ export default async function handler(req, res) {
             <p class="greeting">Your DMILLION luxury order has been confirmed and is being carefully prepared for shipment. Thank you for choosing premium fashion.</p>
 
             <div class="section">
-                <h2>🎯 Tracking Information</h2>
+                <div class="section-header">
+                    <div class="section-icon">📍</div>
+                    <h2>Tracking Information</h2>
+                </div>
                 <div class="tracking-box">
                     <p>YOUR TRACKING NUMBER</p>
                     <div class="number">${tracking_number}</div>
@@ -78,7 +83,10 @@ export default async function handler(req, res) {
             </div>
 
             <div class="section">
-                <h2>📋 Order Summary</h2>
+                <div class="section-header">
+                    <div class="section-icon">✓</div>
+                    <h2>Order Summary</h2>
+                </div>
                 <div class="order-details">
                     <div class="detail-row">
                         <span class="detail-label">Total:</span>
@@ -92,14 +100,20 @@ export default async function handler(req, res) {
             </div>
 
             <div class="section">
-                <h2>🛍️ Items Ordered</h2>
+                <div class="section-header">
+                    <div class="section-icon">◆</div>
+                    <h2>Items Ordered</h2>
+                </div>
                 <div class="items-list">
                     <p>${order_items}</p>
                 </div>
             </div>
 
             <div class="section">
-                <h2>📦 Shipping Address</h2>
+                <div class="section-header">
+                    <div class="section-icon">📦</div>
+                    <h2>Shipping Address</h2>
+                </div>
                 <div class="address-box">
                     ${shipping_address}
                 </div>
