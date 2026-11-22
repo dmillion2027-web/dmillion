@@ -1,17 +1,18 @@
 import { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Download, Shield, X, BarChart3 } from 'lucide-react';
 import { QRScanAnalytics } from '../../admin/components/QRScanAnalytics';
 
-export function ProductQRCode({ product, baseUrl = 'https://dmillionluxury.vercel.app', showAnalytics = false }) {
+export function ProductQRCode({ product, baseUrl = 'https://dmillionluxury.vercel.app', showAnalytics = false, compact = false }) {
   const [showModal, setShowModal] = useState(false);
-  const [activeTab, setActiveTab] = useState('qr'); // 'qr' or 'analytics'
+  const [activeTab, setActiveTab] = useState('qr');
   
   // Generate unique product URL with QR tracking parameter
   const productUrl = `${baseUrl}/product/${product.id}?qr=true`;
   
-  // Use QR Server API to generate QR code
-  const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(productUrl)}`;
+  // Use QR Server API to generate QR code (smaller size for compact mode)
+  const qrSize = compact ? '200x200' : '300x300';
+  const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=${qrSize}&data=${encodeURIComponent(productUrl)}`;
   
   const handleDownload = async () => {
     try {
@@ -43,120 +44,110 @@ export function ProductQRCode({ product, baseUrl = 'https://dmillionluxury.verce
         <span>Authenticity QR</span>
       </motion.button>
 
-      {/* QR Code Modal */}
+      {/* QR Code Modal - Compact */}
       {showModal && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
           className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4"
           onClick={() => setShowModal(false)}
         >
           <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.9, opacity: 0 }}
+            initial={{ scale: 0.95, opacity: 0, y: 10 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: 0.95, opacity: 0, y: 10 }}
+            transition={{ type: "spring", damping: 25, stiffness: 300 }}
             onClick={(e) => e.stopPropagation()}
-            className="bg-white rounded-2xl p-6 sm:p-8 max-w-md w-full shadow-2xl relative"
+            className="bg-white rounded-xl p-6 max-w-sm w-full shadow-2xl relative"
           >
             {/* Close Button */}
             <button
               onClick={() => setShowModal(false)}
-              className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-full transition-colors"
+              className="absolute top-3 right-3 p-1 hover:bg-gray-100 rounded-full transition-colors"
             >
               <X className="w-5 h-5" />
             </button>
 
-            {/* Header with Tabs */}
-            <div className="text-center mb-6">
-              <div className="w-16 h-16 bg-[#e8d5b7] rounded-full flex items-center justify-center mx-auto mb-4">
-                <Shield className="w-8 h-8 text-black" />
-              </div>
-              <h3 className="text-2xl font-serif font-bold mb-2">Product Authentication</h3>
-              
-              {/* Tabs */}
-              {showAnalytics && (
-                <div className="flex space-x-2 mt-4 bg-gray-100 rounded-lg p-1">
-                  <button
-                    onClick={() => setActiveTab('qr')}
-                    className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
-                      activeTab === 'qr' 
-                        ? 'bg-white shadow-sm text-black' 
-                        : 'text-gray-600 hover:text-black'
-                    }`}
-                  >
-                    <Shield className="w-4 h-4 inline mr-2" />
-                    QR Code
-                  </button>
-                  <button
-                    onClick={() => setActiveTab('analytics')}
-                    className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
-                      activeTab === 'analytics' 
-                        ? 'bg-white shadow-sm text-black' 
-                        : 'text-gray-600 hover:text-black'
-                    }`}
-                  >
-                    <BarChart3 className="w-4 h-4 inline mr-2" />
-                    Analytics
-                  </button>
-                </div>
-              )}
+            {/* Compact Header */}
+            <div className="text-center mb-4">
+              <h3 className="text-xl font-bold text-black">QR Code</h3>
+              <p className="text-xs text-gray-500 mt-1">{product.name}</p>
             </div>
 
-            {/* QR Code Tab */}
+            {/* Tabs - Only if analytics available */}
+            {showAnalytics && (
+              <div className="flex space-x-1 mb-4 bg-gray-100 rounded-lg p-1">
+                <button
+                  onClick={() => setActiveTab('qr')}
+                  className={`flex-1 py-2 px-3 rounded-md text-xs font-medium transition-colors ${
+                    activeTab === 'qr' 
+                      ? 'bg-white shadow-sm text-black' 
+                      : 'text-gray-600 hover:text-black'
+                  }`}
+                >
+                  QR
+                </button>
+                <button
+                  onClick={() => setActiveTab('analytics')}
+                  className={`flex-1 py-2 px-3 rounded-md text-xs font-medium transition-colors ${
+                    activeTab === 'analytics' 
+                      ? 'bg-white shadow-sm text-black' 
+                      : 'text-gray-600 hover:text-black'
+                  }`}
+                >
+                  Stats
+                </button>
+              </div>
+            )}
+
+            {/* QR Code Content */}
             {activeTab === 'qr' && (
               <>
-                {/* QR Code */}
-                <div className="bg-white border-4 border-[#e8d5b7] rounded-xl p-4 mb-6">
+                {/* QR Code - Centered */}
+                <div className="bg-gray-50 rounded-lg p-3 mb-4 flex justify-center">
                   <img 
                     src={qrCodeUrl} 
-                    alt={`QR Code for ${product.name}`}
-                    className="w-full h-auto"
+                    alt={`QR Code`}
+                    className="w-40 h-40 sm:w-48 sm:h-48"
                   />
                 </div>
 
-                {/* Product Info */}
-                <div className="bg-gray-50 rounded-lg p-4 mb-6">
-                  <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Product</p>
-                  <p className="font-semibold text-lg mb-2">{product.name}</p>
-                  <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Unique ID</p>
-                  <p className="font-mono text-sm text-gray-700">{product.id}</p>
-                  {product.scan_count !== undefined && (
-                    <>
-                      <p className="text-xs text-gray-500 uppercase tracking-wider mb-1 mt-3">Total Scans</p>
-                      <p className="font-bold text-lg text-[#e8d5b7]">{product.scan_count || 0}</p>
-                    </>
-                  )}
+                {/* Product ID */}
+                <div className="bg-gray-50 rounded-lg p-3 mb-4">
+                  <p className="text-xs text-gray-500 uppercase mb-1">ID</p>
+                  <p className="font-mono text-sm text-gray-800">{product.id}</p>
                 </div>
 
-                {/* Instructions */}
-                <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6">
-                  <p className="text-xs font-semibold text-amber-800 mb-2">🔒 Anti-Counterfeit Feature</p>
-                  <ul className="text-xs text-amber-700 space-y-1">
-                    <li>• Each DMILLION product has a unique QR code</li>
-                    <li>• Scan to verify authenticity on our official website</li>
-                    <li>• Fake products will not have valid QR codes</li>
-                  </ul>
-                </div>
+                {/* Quick Info */}
+                {product.scan_count !== undefined && (
+                  <div className="grid grid-cols-2 gap-2 mb-4">
+                    <div className="bg-blue-50 rounded-lg p-2">
+                      <p className="text-xs text-gray-500">Scans</p>
+                      <p className="font-bold text-blue-600">{product.scan_count || 0}</p>
+                    </div>
+                    <div className="bg-green-50 rounded-lg p-2">
+                      <p className="text-xs text-gray-500">Stock</p>
+                      <p className="font-bold text-green-600">{product.stock_quantity}</p>
+                    </div>
+                  </div>
+                )}
 
                 {/* Download Button */}
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={handleDownload}
-                  className="w-full flex items-center justify-center space-x-2 px-6 py-3 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors font-medium"
+                  className="w-full flex items-center justify-center space-x-2 px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors font-medium text-sm"
                 >
-                  <Download className="w-5 h-5" />
-                  <span>Download QR Code</span>
+                  <Download className="w-4 h-4" />
+                  <span>Download</span>
                 </motion.button>
-
-                <p className="text-xs text-gray-500 text-center mt-4">
-                  Product URL: <span className="font-mono">{productUrl}</span>
-                </p>
               </>
             )}
 
-            {/* Analytics Tab */}
+            {/* Analytics Content */}
             {activeTab === 'analytics' && showAnalytics && (
               <QRScanAnalytics productId={product.id} />
             )}
