@@ -13,6 +13,14 @@ import fallbackImage from '../assets/images/Black_Leather_DMP_Monogram_Handbag-r
 
 const STEPS = ['Shipping', 'Payment', 'Confirmation'];
 
+// Country list
+const COUNTRIES = [
+  'Canada', 'United States', 'Mexico', 'United Kingdom', 'Australia',
+  'Germany', 'France', 'Italy', 'Spain', 'Netherlands', 'Belgium',
+  'Switzerland', 'Sweden', 'Norway', 'Denmark', 'Finland', 'Ireland',
+  'Austria', 'Poland', 'Japan', 'China', 'India', 'Brazil', 'South Africa'
+].sort();
+
 export function CheckoutPage() {
   const { cartItems, getCartTotal, clearCart } = useCart();
   const { user } = useAuth();
@@ -125,6 +133,35 @@ export function CheckoutPage() {
         }
       }
 
+      // Send order confirmation email
+      try {
+        const response = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            service_id: import.meta.env.VITE_EMAILJS_SERVICE_ID,
+            template_id: import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
+            user_id: import.meta.env.VITE_EMAILJS_PUBLIC_KEY,
+            template_params: {
+              to_email: shipping.email,
+              customer_name: shipping.full_name,
+              tracking_number: tracking,
+              order_total: `$${total.toFixed(2)}`,
+              shipping_address: `${shipping.address_line1}, ${shipping.city}, ${shipping.country}`,
+              order_items: cartItems.map(item => `${item.name} x${item.quantity}`).join(', '),
+              contact_email: 'support@dmillion.com',
+            }
+          })
+        });
+
+        if (!response.ok) {
+          console.warn('Email notification failed, but order was created');
+        }
+      } catch (emailErr) {
+        console.warn('Could not send email notification:', emailErr);
+        // Don't fail the order if email fails
+      }
+
       setOrderData({ ...order, tracking_number: tracking });
       clearCart();
       setCurrentStep(2);
@@ -202,7 +239,6 @@ export function CheckoutPage() {
                       { name: 'address_line2', label: 'Address Line 2 (Optional)', type: 'text', required: false, colSpan: 2 },
                       { name: 'city', label: 'City', type: 'text', required: true, colSpan: 1 },
                       { name: 'state', label: 'State / Province', type: 'text', required: false, colSpan: 1 },
-                      { name: 'country', label: 'Country', type: 'text', required: true, colSpan: 1 },
                       { name: 'postal_code', label: 'Postal Code', type: 'text', required: false, colSpan: 1 },
                     ].map(field => (
                       <div key={field.name} className={field.colSpan === 2 ? 'md:col-span-2' : ''}>
@@ -216,6 +252,22 @@ export function CheckoutPage() {
                         />
                       </div>
                     ))}
+
+                    {/* Country Dropdown */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Country</label>
+                      <select
+                        required
+                        value={shipping.country}
+                        onChange={e => setShipping({ ...shipping, country: e.target.value })}
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-[#e8d5b7] transition-colors bg-white"
+                      >
+                        <option value="">Select a country</option>
+                        {COUNTRIES.map(country => (
+                          <option key={country} value={country}>{country}</option>
+                        ))}
+                      </select>
+                    </div>
                   </div>
 
                   <motion.button type="submit" whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}

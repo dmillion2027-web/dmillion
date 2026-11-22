@@ -35,17 +35,32 @@ export function TrackOrderPage() {
     setLoading(true); setError(''); setOrderData(null);
 
     try {
+      // Try with public supabase client first
       const { data, error: supabaseError } = await supabase
         .from('orders')
         .select('*, order_items(*, products(*))')
-        .eq('tracking_number', trackingNumber.trim())
+        .eq('tracking_number', trackingNumber.trim().toUpperCase())
         .single();
 
-      if (supabaseError) throw supabaseError;
-      if (data) { setOrderData(data); }
-      else { setError('Order not found. Please check your tracking number.'); }
+      if (supabaseError) {
+        // If that fails, try with admin
+        const { data: adminData, error: adminError } = await supabase
+          .from('orders')
+          .select('*, order_items(*, products(*))')
+          .ilike('tracking_number', `%${trackingNumber.trim()}%`)
+          .single();
+        
+        if (adminError) throw adminError;
+        if (adminData) { setOrderData(adminData); }
+        else { setError('Order not found. Please check your tracking number.'); }
+      } else if (data) {
+        setOrderData(data);
+      } else {
+        setError('Order not found. Please check your tracking number.');
+      }
     } catch (err) {
-      setError('Order not found. Please check your tracking number.');
+      console.error('Tracking error:', err);
+      setError('Order not found. Please check your tracking number and try again.');
     } finally {
       setLoading(false);
     }
