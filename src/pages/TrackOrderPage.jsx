@@ -35,25 +35,31 @@ export function TrackOrderPage() {
     setLoading(true); setError(''); setOrderData(null);
 
     try {
-      // Try with public supabase client first
-      const { data, error: supabaseError } = await supabase
+      const cleanTrackingNumber = trackingNumber.trim().toUpperCase();
+      
+      // Try exact match first
+      let { data, error: exactError } = await supabase
         .from('orders')
         .select('*, order_items(*, products(*))')
-        .eq('tracking_number', trackingNumber.trim().toUpperCase())
+        .eq('tracking_number', cleanTrackingNumber)
         .single();
 
-      if (supabaseError) {
-        // If that fails, try with admin
-        const { data: adminData, error: adminError } = await supabase
+      if (exactError) {
+        // Try case-insensitive match
+        const { data: likeData, error: likeError } = await supabase
           .from('orders')
           .select('*, order_items(*, products(*))')
-          .ilike('tracking_number', `%${trackingNumber.trim()}%`)
-          .single();
+          .ilike('tracking_number', `%${cleanTrackingNumber}%`);
         
-        if (adminError) throw adminError;
-        if (adminData) { setOrderData(adminData); }
-        else { setError('Order not found. Please check your tracking number.'); }
-      } else if (data) {
+        if (likeError || !likeData || likeData.length === 0) {
+          throw new Error('No matching orders found');
+        }
+        // Get first match
+        data = likeData[0];
+      }
+
+      if (data) {
+        console.log('Order found:', data);
         setOrderData(data);
       } else {
         setError('Order not found. Please check your tracking number.');
