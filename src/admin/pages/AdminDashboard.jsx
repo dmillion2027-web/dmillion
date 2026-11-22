@@ -1092,7 +1092,7 @@ export function AdminDashboard({ user, onLogout }) {
                           <div className="flex items-center gap-1 sm:gap-2">
                             {/* QR Code Button */}
                             <div className="flex-shrink-0">
-                              <ProductQRCode product={product} />
+                              <ProductQRCode product={product} showAnalytics={true} />
                             </div>
                             <motion.button
                               whileHover={{ scale: 1.1 }}
