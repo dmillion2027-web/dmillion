@@ -9,6 +9,7 @@ import {
 import { supabase } from '../../lib/supabase';
 import { adminSupabase } from '../lib/adminSupabase';
 import { AdminAnalytics } from './AdminAnalytics';
+import { ProductQRCode } from '../../components/ui/ProductQRCode';
 
 const TABS = [
   { id: 'overview', label: 'Overview', icon: LayoutDashboard },
@@ -1086,9 +1087,13 @@ export function AdminDashboard({ user, onLogout }) {
                         </div>
 
                         {/* Price & Actions */}
-                        <div className="flex items-center justify-between gap-2 w-full sm:w-auto">
+                        <div className="flex items-center justify-between gap-2 w-full sm:w-auto flex-wrap">
                           <p className="text-base sm:text-lg md:text-xl font-bold text-[#e8d5b7]">${parseFloat(product.price).toLocaleString()}</p>
                           <div className="flex items-center gap-1 sm:gap-2">
+                            {/* QR Code Button */}
+                            <div className="flex-shrink-0">
+                              <ProductQRCode product={product} />
+                            </div>
                             <motion.button
                               whileHover={{ scale: 1.1 }}
                               whileTap={{ scale: 0.9 }}
