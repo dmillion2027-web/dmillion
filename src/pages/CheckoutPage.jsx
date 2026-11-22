@@ -135,44 +135,51 @@ export function CheckoutPage() {
 
       // Send order confirmation email
       try {
-        const templateId = import.meta.env.EMAILJS_ORDER_TEMPLATE_ID || import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
+        // Try to get from environment, fallback to hardcoded values
+        const templateId = import.meta.env.EMAILJS_ORDER_TEMPLATE_ID || 'template_6er4mkn';
+        const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID || 'service_0dphftg';
+        const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY || '2CPqgqjZJeBh8LJ9L';
         
-        console.log('Email Debug:', {
-          service_id: import.meta.env.VITE_EMAILJS_SERVICE_ID,
-          template_id: templateId,
-          user_id: import.meta.env.VITE_EMAILJS_PUBLIC_KEY ? 'present' : 'missing',
-          to_email: shipping.email
+        console.log('📧 Sending order email...', {
+          templateId,
+          serviceId,
+          email: shipping.email
         });
+
+        const payload = {
+          service_id: serviceId,
+          template_id: templateId,
+          user_id: publicKey,
+          template_params: {
+            to_email: shipping.email,
+            customer_name: shipping.full_name,
+            tracking_number: tracking,
+            order_total: `$${total.toFixed(2)}`,
+            shipping_address: `${shipping.address_line1}, ${shipping.city}, ${shipping.country}`,
+            order_items: cartItems.map(item => `${item.name} x${item.quantity}`).join(', '),
+            contact_email: 'support@dmillion.com',
+          }
+        };
+
+        console.log('📮 Email payload:', payload);
 
         const response = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            service_id: import.meta.env.VITE_EMAILJS_SERVICE_ID,
-            template_id: templateId,
-            user_id: import.meta.env.VITE_EMAILJS_PUBLIC_KEY,
-            template_params: {
-              to_email: shipping.email,
-              customer_name: shipping.full_name,
-              tracking_number: tracking,
-              order_total: `$${total.toFixed(2)}`,
-              shipping_address: `${shipping.address_line1}, ${shipping.city}, ${shipping.country}`,
-              order_items: cartItems.map(item => `${item.name} x${item.quantity}`).join(', '),
-              contact_email: 'support@dmillion.com',
-            }
-          })
+          body: JSON.stringify(payload)
         });
 
-        const responseData = await response.json();
-        console.log('Email response:', responseData);
+        const responseText = await response.text();
+        console.log('📬 Email response status:', response.status);
+        console.log('📬 Email response:', responseText);
 
-        if (!response.ok) {
-          console.error('Email notification failed:', responseData);
-        } else {
+        if (response.ok) {
           console.log('✅ Email sent successfully!');
+        } else {
+          console.error('❌ Email failed:', responseText);
         }
       } catch (emailErr) {
-        console.error('Email error:', emailErr);
+        console.error('❌ Email error:', emailErr);
       }
 
       setOrderData({ ...order, tracking_number: tracking });
