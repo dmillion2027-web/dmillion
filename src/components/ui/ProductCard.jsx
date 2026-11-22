@@ -57,12 +57,11 @@ export function ProductCard({ product, onAddToCart, onViewDetails }) {
           />
         </motion.button>
 
-        {/* View Details - shows on hover */}
+        {/* View Details - Always Visible */}
         <motion.button
-          initial={{ opacity: 0 }}
-          animate={{ opacity: isHovered ? 1 : 0 }}
-          transition={{ duration: 0.2 }}
           onClick={() => onViewDetails(product)}
+          whileHover={{ scale: 1.15 }}
+          whileTap={{ scale: 0.9 }}
           className="absolute bottom-2 right-2 sm:bottom-3 sm:right-3 w-9 h-9 sm:w-10 sm:h-10 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-[#e8d5b7] transition-colors duration-300 z-10"
         >
           <Eye className="w-4 h-4 sm:w-5 sm:h-5" />
