@@ -1,9 +1,9 @@
 import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import heroBackground from '../../assets/images/D919CFF6-4388-4F76-A2F7-8179BC8C129D.webp';
 
 export function Hero() {
-  const heroBackground = '/src/assets/images/D919CFF6-4388-4F76-A2F7-8179BC8C129D.webp';
   
   return (
     <section className="relative min-h-[90vh] flex items-center overflow-hidden bg-[#3d2415]">
