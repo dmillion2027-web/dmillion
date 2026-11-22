@@ -154,9 +154,10 @@ export function ProductQRCode({ product, baseUrl = 'https://dmillionluxury.verce
             {activeTab === 'analytics' && showAnalytics && (
               <QRScanAnalytics productId={product.id} />
             )}
+            </motion.div>
           </motion.div>
-        </motion.div>
-      )}
+        )}
+      </AnimatePresence>
     </>
   );
 }
