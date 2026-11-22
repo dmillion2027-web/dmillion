@@ -154,21 +154,22 @@ export function AdminDashboard({ user, onLogout }) {
       // Send status update email to customer
       try {
         const order = orders.find(o => o.id === orderId);
-        if (order) {
+        if (order && order.customer_email) {
           await fetch('/api/send-order-status-email', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               to: order.customer_email,
-              customer_name: order.customer_name,
+              customer_name: order.customer_name || 'Valued Customer',
               tracking_number: order.tracking_number,
               new_status: newStatus,
-              order_total: order.total_amount
+              order_total: `$${order.total_amount?.toFixed(2) || '0.00'}`
             })
           });
         }
       } catch (emailErr) {
         console.error('Status email error:', emailErr);
+        // Don't block the status update if email fails
       }
     } catch (err) {
       console.error('Update error:', err);
