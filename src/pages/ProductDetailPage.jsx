@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { supabase } from '../lib/supabase';
+import { useQRScanTracking } from '../hooks/useQRScanTracking';
 import fallbackImage from '../assets/images/Black_Leather_DMP_Monogram_Handbag-removebg-preview.png';
 
 // Draggable + zoomable image viewer
@@ -50,6 +51,9 @@ export function ProductDetailPage() {
   const [quantity, setQuantity] = useState(1);
   const [isFavorite, setIsFavorite] = useState(false);
   const [addedToCart, setAddedToCart] = useState(false);
+
+  // Track QR code scans
+  useQRScanTracking(id);
 
   const features = [
     { icon: Truck, text: 'Free Express Shipping' },

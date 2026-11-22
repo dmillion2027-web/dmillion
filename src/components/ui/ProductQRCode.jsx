@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Download, Shield, X, BarChart3 } from 'lucide-react';
+import { Download, Shield, X } from 'lucide-react';
 import { QRScanAnalytics } from '../../admin/components/QRScanAnalytics';
 
 export function ProductQRCode({ product, baseUrl = 'https://dmillionluxury.vercel.app', showAnalytics = false, compact = false }) {
@@ -44,24 +44,27 @@ export function ProductQRCode({ product, baseUrl = 'https://dmillionluxury.verce
         <span>Authenticity QR</span>
       </motion.button>
 
-      {/* QR Code Modal - Compact */}
-      {showModal && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.2 }}
-          className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-          onClick={() => setShowModal(false)}
-        >
+      {/* QR Code Modal - Layer on Screen */}
+      <AnimatePresence>
+        {showModal && (
           <motion.div
-            initial={{ scale: 0.95, opacity: 0, y: 10 }}
-            animate={{ scale: 1, opacity: 1, y: 0 }}
-            exit={{ scale: 0.95, opacity: 0, y: 10 }}
-            transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            onClick={(e) => e.stopPropagation()}
-            className="bg-white rounded-xl p-6 max-w-sm w-full shadow-2xl relative"
+            key="qr-modal-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            onClick={() => setShowModal(false)}
           >
+            <motion.div
+              key="qr-modal-content"
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              transition={{ type: "spring", damping: 20, stiffness: 300 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white rounded-xl p-6 max-w-sm w-full shadow-2xl relative"
+            >
             {/* Close Button */}
             <button
               onClick={() => setShowModal(false)}
