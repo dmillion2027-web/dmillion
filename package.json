@@ -13,6 +13,8 @@
     "@emailjs/browser": "^5.0.3",
     "@react-three/drei": "^9.114.3",
     "@react-three/fiber": "^8.17.10",
+    "@stripe/react-stripe-js": "^2.7.1",
+    "@stripe/stripe-js": "^3.1.0",
     "@supabase/supabase-js": "^2.119.0",
     "framer-motion": "^11.11.17",
     "lucide-react": "^0.460.0",
@@ -23,6 +25,7 @@
     "react-hot-toast": "^2.6.1",
     "react-router-dom": "^6.28.0",
     "recharts": "^3.11.0",
+    "stripe": "^14.7.0",
     "three": "^0.169.0"
   },
   "devDependencies": {
