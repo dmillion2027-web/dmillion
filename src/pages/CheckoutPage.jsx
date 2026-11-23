@@ -51,7 +51,7 @@ export function CheckoutPage() {
   const [loading, setLoading] = useState(false);
   const [orderData, setOrderData] = useState(null);
 
-  const tax = getCartTotal() * 0.08;
+  const tax = getCartTotal() * 0.05;
   const total = getCartTotal() + tax;
 
   // Shipping form
@@ -405,9 +405,6 @@ function OrderSummary({ cartItems, total, tax, getCartTotal }) {
         <div className="border-t border-gray-100 pt-4 space-y-2">
           <div className="flex justify-between text-sm text-gray-600">
             <span>Subtotal</span><span>${getCartTotal().toLocaleString()}</span>
-          </div>
-          <div className="flex justify-between text-sm text-gray-600">
-            <span>Shipping</span><span className="text-green-600">Free</span>
           </div>
           <div className="flex justify-between text-sm text-gray-600">
             <span>Tax (8%)</span><span>${tax.toFixed(2)}</span>
