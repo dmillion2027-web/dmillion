@@ -4,16 +4,16 @@ import { Award, Users, Globe, Sparkles } from 'lucide-react';
 
 export function AboutPage() {
   const timeline = [
-    { year: '2010', title: 'The Beginning', description: 'DMILLION was founded with a vision to create timeless luxury bags.' },
-    { year: '2015', title: 'Global Expansion', description: 'Opened flagship stores in major fashion capitals worldwide.' },
-    { year: '2020', title: 'Sustainability', description: 'Launched eco-friendly collection using sustainable materials.' },
-    { year: '2025', title: 'Digital Innovation', description: 'Pioneered 3D visualization for online luxury shopping.' },
+    { title: 'Our Foundation', description: 'DMILLION was born from a passion for exceptional craftsmanship and timeless design. We create luxury bags that transcend trends.' },
+    { title: 'Global Recognition', description: 'Our collections have earned acclaim from fashion enthusiasts and critics worldwide for their innovative design and uncompromising quality.' },
+    { title: 'Sustainable Luxury', description: 'We champion eco-conscious manufacturing, using ethically sourced materials without compromising on elegance or durability.' },
+    { title: 'Digital Excellence', description: 'Today, we blend heritage craftsmanship with cutting-edge technology to bring our luxury collections to customers globally.' },
   ];
 
   const achievements = [
     { icon: Award, value: '50+', label: 'Design Awards' },
-    { icon: Users, value: '100K+', label: 'Happy Customers' },
-    { icon: Globe, value: '45', label: 'Countries' },
+    { icon: Users, value: '100K+', label: 'Loyal Customers' },
+    { icon: Globe, value: '45', label: 'Countries Served' },
     { icon: Sparkles, value: '15+', label: 'Years of Excellence' },
   ];
 
@@ -66,7 +66,7 @@ export function AboutPage() {
           <div className="max-w-4xl mx-auto">
             {timeline.map((item, index) => (
               <motion.div
-                key={item.year}
+                key={item.title}
                 initial={{ opacity: 0, x: index % 2 === 0 ? -50 : 50 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
@@ -75,7 +75,6 @@ export function AboutPage() {
               >
                 <div className="absolute left-0 top-0 w-3 h-3 sm:w-4 sm:h-4 bg-[#e8d5b7] rounded-full -translate-x-[6.5px] sm:-translate-x-[9px]"></div>
                 <div className="bg-gradient-to-br from-stone-50 to-[#e8d5b7]/20 p-4 sm:p-6 rounded-lg">
-                  <div className="text-2xl sm:text-3xl font-serif text-[#3d2415] mb-2">{item.year}</div>
                   <h3 className="text-lg sm:text-xl font-semibold mb-2">{item.title}</h3>
                   <p className="text-sm sm:text-base text-gray-600">{item.description}</p>
                 </div>
