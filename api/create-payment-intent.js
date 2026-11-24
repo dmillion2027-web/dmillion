@@ -9,14 +9,23 @@ export default async function handler(req, res) {
 
   const { amount, orderId, customerEmail, customerName } = req.body;
 
-  if (!amount || amount < 50) {
-    return res.status(400).json({ error: 'Amount must be at least $0.50' });
+  console.log('💰 Payment Intent Request:', { amount, orderId, customerEmail, customerName });
+
+  // Ensure amount is a number and at least 50 cents (in dollars, will be converted to cents)
+  const amountInDollars = parseFloat(amount);
+  
+  if (!amountInDollars || amountInDollars < 0.50) {
+    console.error('❌ Invalid amount:', { received: amount, parsed: amountInDollars });
+    return res.status(400).json({ error: `Amount must be at least $0.50. Received: $${amountInDollars || 'invalid'}` });
   }
 
   try {
     // Create payment intent
+    const amountInCents = Math.round(amountInDollars * 100);
+    console.log('✅ Creating Stripe payment intent:', { amountInDollars, amountInCents, currency: 'usd' });
+    
     const paymentIntent = await stripe.paymentIntents.create({
-      amount: Math.round(amount * 100), // Convert to cents
+      amount: amountInCents,
       currency: 'usd',
       metadata: {
         orderId: orderId,
@@ -26,6 +35,7 @@ export default async function handler(req, res) {
       description: `DMILLION Order #${orderId}`,
     });
 
+    console.log('✅ Payment intent created:', paymentIntent.id);
     return res.status(200).json({
       clientSecret: paymentIntent.client_secret,
       paymentIntentId: paymentIntent.id,
