@@ -45,11 +45,14 @@ export function StripePaymentForm({ total, orderId, shippingEmail, shippingName,
       console.log('✅ Payment intent created:', intentData.paymentIntentId);
 
       // 2. Confirm payment with Stripe
+      const cardElement = elements.getElement(CardElement);
+      console.log('💳 Card element:', cardElement);
+      
       const { paymentIntent, error: stripeError } = await stripe.confirmCardPayment(
         intentData.clientSecret,
         {
           payment_method: {
-            card: elements.getElement(CardElement),
+            card: cardElement,
             billing_details: {
               name: shippingName,
               email: shippingEmail,
@@ -59,6 +62,12 @@ export function StripePaymentForm({ total, orderId, shippingEmail, shippingName,
       );
 
       if (stripeError) {
+        console.error('❌ Stripe error:', {
+          type: stripeError.type,
+          code: stripeError.code,
+          message: stripeError.message,
+          decline_code: stripeError.decline_code,
+        });
         setError(stripeError.message);
         onPaymentError(stripeError.message);
         return;
