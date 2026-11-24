@@ -1,9 +1,9 @@
+/* Import aggressive mobile optimization */
+@import './styles/mobile.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-/* Import aggressive mobile optimization */
-@import './styles/mobile.css';
 
 @layer base {
   * {
