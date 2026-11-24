@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useStripe, useElements, CardElement } from '@stripe/react-stripe-js';
+import { useState, useEffect } from 'react';
+import { useStripe, useElements, PaymentElement } from '@stripe/react-stripe-js';
 import { motion } from 'framer-motion';
 import { Lock, AlertCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -9,60 +9,80 @@ export function StripePaymentForm({ total, orderId, shippingEmail, shippingName,
   const elements = useElements();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [clientSecret, setClientSecret] = useState('');
+
+  // Create payment intent on mount
+  useEffect(() => {
+    const createIntent = async () => {
+      try {
+        const response = await fetch('/api/create-payment-intent', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            amount: total,
+            orderId: orderId,
+            customerEmail: shippingEmail,
+            customerName: shippingName,
+          }),
+        });
+
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.error || 'Failed to create payment intent');
+        }
+        setClientSecret(data.clientSecret);
+      } catch (err) {
+        setError(err.message);
+        console.error('Intent creation error:', err);
+      }
+    };
+
+    if (total > 0) {
+      createIntent();
+    }
+  }, [total, orderId, shippingEmail, shippingName]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
-    if (!stripe || !elements) {
-      setError('Payment system not loaded. Please refresh and try again.');
+    if (!stripe || !elements || !clientSecret) {
+      setError('Payment system not ready. Please refresh and try again.');
       return;
     }
 
     setLoading(true);
 
     try {
-      // 1. Create payment intent on backend
-      const intentResponse = await fetch('/api/create-payment-intent', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          amount: total,
-          orderId: orderId,
-          customerEmail: shippingEmail,
-          customerName: shippingName,
-        }),
-      });
-
-      const intentData = await intentResponse.json();
-
-      if (!intentResponse.ok) {
-        throw new Error(intentData.error || 'Failed to create payment');
-      }
-
-      // 2. Confirm payment with Stripe
-      const { paymentIntent, error: stripeError } = await stripe.confirmCardPayment(
-        intentData.clientSecret,
-        {
-          payment_method: {
-            card: elements.getElement(CardElement),
+      // Confirm payment with Stripe
+      const { paymentIntent, error: stripeError } = await stripe.confirmPayment({
+        elements,
+        clientSecret,
+        redirect: 'if_required',
+        confirmParams: {
+          return_url: `${window.location.origin}/checkout?step=confirmation`,
+          payment_method_data: {
             billing_details: {
               name: shippingName,
               email: shippingEmail,
             },
           },
-        }
-      );
+        },
+      });
 
       if (stripeError) {
         setError(stripeError.message);
         onPaymentError(stripeError.message);
+        setLoading(false);
         return;
       }
 
       if (paymentIntent.status === 'succeeded') {
         console.log('✅ Payment successful!', paymentIntent);
         onPaymentSuccess(paymentIntent);
+      } else if (paymentIntent.status === 'requires_action') {
+        // Handle 3D Secure or other authentication
+        console.log('⚠️ Payment requires additional action');
       } else {
         setError(`Payment status: ${paymentIntent.status}`);
         onPaymentError(`Payment status: ${paymentIntent.status}`);
@@ -78,27 +98,32 @@ export function StripePaymentForm({ total, orderId, shippingEmail, shippingName,
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      {/* Card Input */}
-      <div className="bg-white rounded-xl border border-gray-200 p-4">
-        <CardElement
-          options={{
-            style: {
-              base: {
-                fontSize: '16px',
-                color: '#1a1a1a',
-                fontFamily: '"Playfair Display", serif',
-                '::placeholder': {
-                  color: '#999',
+      {/* Payment Element - Supports cards, bank transfers, digital wallets, etc. */}
+      {clientSecret && (
+        <div className="bg-white rounded-xl border border-gray-200 p-4">
+          <PaymentElement
+            options={{
+              layout: 'tabs',
+              defaultValues: {
+                billingDetails: {
+                  name: shippingName,
+                  email: shippingEmail,
                 },
               },
-              invalid: {
-                color: '#dc2626',
-              },
-            },
-          }}
-          className="p-2"
-        />
-      </div>
+            }}
+          />
+        </div>
+      )}
+
+      {/* Loading state while creating intent */}
+      {!clientSecret && (
+        <div className="bg-white rounded-xl border border-gray-200 p-8 text-center">
+          <div className="inline-flex items-center space-x-2">
+            <div className="w-4 h-4 border-2 border-gray-300 border-t-black rounded-full animate-spin" />
+            <span className="text-gray-600">Preparing payment options...</span>
+          </div>
+        </div>
+      )}
 
       {/* Error Message */}
       {error && (
@@ -115,7 +140,7 @@ export function StripePaymentForm({ total, orderId, shippingEmail, shippingName,
       {/* Submit Button */}
       <motion.button
         type="submit"
-        disabled={loading || !stripe}
+        disabled={loading || !stripe || !clientSecret}
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
         className="w-full mt-6 py-4 bg-black hover:bg-[#3d2415] disabled:bg-gray-400 text-white rounded-xl font-semibold transition-colors flex items-center justify-center space-x-2"
@@ -133,10 +158,13 @@ export function StripePaymentForm({ total, orderId, shippingEmail, shippingName,
         )}
       </motion.button>
 
-      {/* Security Message */}
-      <div className="flex items-center justify-center space-x-2 text-xs text-gray-500">
-        <Lock className="w-3 h-3" />
-        <span>Secured by Stripe • PCI Compliant</span>
+      {/* Security & Payment Methods Message */}
+      <div className="space-y-2 text-xs text-gray-500 text-center">
+        <div className="flex items-center justify-center space-x-2">
+          <Lock className="w-3 h-3" />
+          <span>Secured by Stripe • PCI Compliant</span>
+        </div>
+        <p className="text-gray-400">We accept cards, bank transfers, and other local payment methods</p>
       </div>
     </form>
   );
