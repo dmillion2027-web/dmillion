@@ -54,15 +54,6 @@ export function CheckoutPage() {
   const tax = getCartTotal() * 0.05;
   const total = getCartTotal() + tax;
 
-  // Debug: Log cart and totals
-  console.log('🛒 Checkout Debug:', {
-    cartItems: cartItems.length,
-    cartItemDetails: cartItems.map(item => ({ name: item.name, price: item.price, quantity: item.quantity })),
-    cartTotal: getCartTotal(),
-    tax,
-    total,
-  });
-
   // Shipping form
   const [shipping, setShipping] = useState({
     full_name: user?.user_metadata?.full_name || '',

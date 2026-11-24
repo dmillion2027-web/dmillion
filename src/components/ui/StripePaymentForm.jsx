@@ -22,8 +22,6 @@ export function StripePaymentForm({ total, orderId, shippingEmail, shippingName,
     setLoading(true);
 
     try {
-      console.log('💳 Submitting payment with amount:', total);
-
       // 1. Create payment intent on backend
       const intentResponse = await fetch('/api/create-payment-intent', {
         method: 'POST',
@@ -42,11 +40,8 @@ export function StripePaymentForm({ total, orderId, shippingEmail, shippingName,
         throw new Error(intentData.error || 'Failed to create payment');
       }
 
-      console.log('✅ Payment intent created:', intentData.paymentIntentId);
-
       // 2. Confirm payment with Stripe
       const cardElement = elements.getElement(CardElement);
-      console.log('💳 Card element:', cardElement);
       
       const { paymentIntent, error: stripeError } = await stripe.confirmCardPayment(
         intentData.clientSecret,
