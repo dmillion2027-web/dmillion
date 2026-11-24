@@ -4,17 +4,17 @@ import { Award, Users, Globe, Sparkles } from 'lucide-react';
 
 export function AboutPage() {
   const timeline = [
-    { title: 'Our Foundation', description: 'DMILLION was born from a passion for exceptional craftsmanship and timeless design. We create luxury bags that transcend trends.' },
-    { title: 'Global Recognition', description: 'Our collections have earned acclaim from fashion enthusiasts and critics worldwide for their innovative design and uncompromising quality.' },
-    { title: 'Sustainable Luxury', description: 'We champion eco-conscious manufacturing, using ethically sourced materials without compromising on elegance or durability.' },
-    { title: 'Digital Excellence', description: 'Today, we blend heritage craftsmanship with cutting-edge technology to bring our luxury collections to customers globally.' },
+    { title: 'Craftsmanship Excellence', description: 'Every DMILLION piece is meticulously handcrafted by master artisans using premium Italian and French leathers. We believe luxury is in the details.' },
+    { title: 'Global Prestige', description: 'From Milan to Manhattan, our collections are trusted by discerning customers who refuse to compromise on quality. DMILLION is synonymous with refined taste.' },
+    { title: 'Ethical Innovation', description: 'We revolutionized luxury by proving that sustainability and elegance aren\'t mutually exclusive. Our eco-conscious practices set new industry standards.' },
+    { title: 'The Future of Luxury', description: 'We\'re not just preserving heritage—we\'re redefining what luxury means for the modern era. Technology meets tradition in every DMILLION creation.' },
   ];
 
   const achievements = [
-    { icon: Award, value: '50+', label: 'Design Awards' },
-    { icon: Users, value: '100K+', label: 'Loyal Customers' },
-    { icon: Globe, value: '45', label: 'Countries Served' },
-    { icon: Sparkles, value: '15+', label: 'Years of Excellence' },
+    { icon: Award, value: '50+', label: 'International Awards' },
+    { icon: Users, value: '100K+', label: 'Elite Clientele' },
+    { icon: Globe, value: '45+', label: 'Premium Markets' },
+    { icon: Sparkles, value: '#1', label: 'Luxury Choice' },
   ];
 
   return (
@@ -37,11 +37,11 @@ export function AboutPage() {
               ABOUT DMILLION
             </span>
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-serif mb-4 sm:mb-6 px-4">
-              Crafting Excellence Since 2010
+              The Art of Luxury
             </h1>
             <p className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-600 leading-relaxed px-4">
-              We believe that a bag is more than an accessory—it's a statement of who you are. 
-              Every DMILLION piece embodies our commitment to quality, elegance, and timeless design.
+              DMILLION represents more than exceptional bags—it's a statement of elegance, power, and refined taste. 
+              We create timeless pieces for those who understand that true luxury transcends trends and endures forever.
             </p>
           </motion.div>
         </div>
