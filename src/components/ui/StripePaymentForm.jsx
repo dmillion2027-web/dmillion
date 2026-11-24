@@ -15,6 +15,13 @@ export function StripePaymentForm({ total, orderId, shippingEmail, shippingName,
   useEffect(() => {
     const createIntent = async () => {
       try {
+        console.log('💳 Creating payment intent:', {
+          amount: total,
+          amountInCents: Math.round(total * 100),
+          orderId,
+          email: shippingEmail,
+        });
+
         const response = await fetch('/api/create-payment-intent', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -31,9 +38,10 @@ export function StripePaymentForm({ total, orderId, shippingEmail, shippingName,
           throw new Error(data.error || 'Failed to create payment intent');
         }
         setClientSecret(data.clientSecret);
+        console.log('✅ Payment intent created successfully');
       } catch (err) {
         setError(err.message);
-        console.error('Intent creation error:', err);
+        console.error('❌ Intent creation error:', err);
       }
     };
 
