@@ -1,0 +1,19 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /api/
+
+# Specific crawl delays
+Crawl-delay: 1
+
+# Sitemap location
+Sitemap: https://dmillionluxury.ca/sitemap.xml
+
+# Google Search Console
+User-agent: Googlebot
+Allow: /
+
+# Bing
+User-agent: Bingbot
+Allow: /

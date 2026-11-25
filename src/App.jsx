@@ -6,6 +6,7 @@ import { ToastProvider } from './components/ui/Toast';
 import { CustomCursor } from './components/ui/CustomCursor';
 import { Header } from './components/ui/Header';
 import { Footer } from './components/ui/Footer';
+import { SchemaMarkup } from './components/SchemaMarkup';
 import { Home } from './pages/Home';
 import { CollectionPage } from './pages/CollectionPage';
 import { AboutPage } from './pages/AboutPage';
@@ -24,6 +25,7 @@ function AppContent() {
 
   return (
     <Router>
+      <SchemaMarkup />
       <CustomCursor />
       <div className="flex flex-col min-h-screen">
         <Header cartItemCount={getCartItemCount()} />
