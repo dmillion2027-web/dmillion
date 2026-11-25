@@ -58,7 +58,7 @@ export function Footer() {
     },
     {
       icon: Facebook,
-      url: 'https://www.facebook.com/share/1E1P7ftxtA/?mibextid=wwXIfr',
+      url: 'https://facebook.com/dmillion2027',
       label: 'Facebook',
     },
   ];
