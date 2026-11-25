@@ -15,15 +15,28 @@ export default async function handler(req, res) {
     contact_email,
   } = req.body;
 
+  console.log('📧 Email request received:', { to, customer_name, tracking_number });
+
   try {
+    // Check if credentials are set
+    if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
+      console.error('❌ Gmail credentials missing!', {
+        user: process.env.GMAIL_USER ? '***SET***' : 'NOT SET',
+        password: process.env.GMAIL_APP_PASSWORD ? '***SET***' : 'NOT SET',
+      });
+      return res.status(500).json({ error: 'Gmail credentials not configured' });
+    }
+
     // Create transporter using Gmail
     const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
         user: process.env.GMAIL_USER,
-        pass: process.env.GMAIL_APP_PASSWORD, // Use Gmail App Password, not regular password
+        pass: process.env.GMAIL_APP_PASSWORD,
       },
     });
+
+    console.log('📧 Transporter created for:', process.env.GMAIL_USER);
 
     // Email HTML template
     const htmlContent = `
@@ -148,7 +161,7 @@ export default async function handler(req, res) {
     };
 
     const info = await transporter.sendMail(mailOptions);
-    console.log('✅ Email sent:', info.response);
+    console.log('✅ Email sent successfully:', { messageId: info.messageId, to });
 
     return res.status(200).json({
       success: true,
@@ -156,7 +169,11 @@ export default async function handler(req, res) {
       messageId: info.messageId,
     });
   } catch (error) {
-    console.error('❌ Email error:', error);
+    console.error('❌ Email error:', {
+      message: error.message,
+      code: error.code,
+      response: error.response,
+    });
     return res.status(500).json({
       success: false,
       error: error.message,
