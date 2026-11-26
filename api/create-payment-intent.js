@@ -3,11 +3,11 @@ import Stripe from 'stripe';
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 export default async function handler(req, res) {
-  // Set CORS headers
-  res.setHeader('Access-Control-Allow-Origin', 'https://dmillionluxury.ca');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  // Set CORS headers - allow all origins for now
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  res.setHeader('Access-Control-Max-Age', '86400');
+  res.setHeader('Access-Control-Max-Age', '3600');
 
   // Handle preflight requests
   if (req.method === 'OPTIONS') {
