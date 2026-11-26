@@ -13,6 +13,9 @@ const authClient = createClient(
       persistSession: true,
       autoRefreshToken: true,
       storageKey: 'dmillion-admin-auth', // separate storage from main site
+      redirectTo: window.location.hostname.includes('vercel') || window.location.hostname.includes('localhost')
+        ? 'https://dmillionluxury.ca/admin.html'
+        : `${window.location.origin}/admin.html`,
     }
   }
 );

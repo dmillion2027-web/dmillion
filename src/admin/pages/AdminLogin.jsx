@@ -10,10 +10,16 @@ export function AdminLogin({ accessDenied, authClient }) {
     setLoading(true);
     setError('');
     try {
+      // Use custom domain for redirect, fallback to current origin if on dev
+      const redirectUrl = window.location.hostname.includes('localhost') || window.location.hostname.includes('vercel')
+        ? 'https://dmillionluxury.ca/admin.html'
+        : `${window.location.origin}/admin.html`;
+      
+      console.log('Auth redirect URL:', redirectUrl);
       const { error } = await authClient.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/admin.html`,
+          redirectTo: redirectUrl,
         },
       });
       if (error) throw error;
