@@ -68,49 +68,59 @@ export function AdminDashboard({ user, onLogout }) {
 
   // Effects
   useEffect(() => {
+    // Initial load
     fetchProducts();
     fetchOrders();
     fetchSubscribers();
 
-    // Real-time subscription for orders - with debounce to avoid rapid re-fetches
-    let ordersFetchTimeout;
+    // Real-time subscription for orders
     const ordersSub = adminSupabase
-      .channel('admin-orders')
+      .channel('admin-orders-channel')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, (payload) => {
         console.log('Order change detected:', payload);
-        // Debounce the fetch to avoid overwriting optimistic updates
-        clearTimeout(ordersFetchTimeout);
-        ordersFetchTimeout = setTimeout(() => {
-          console.log('Fetching fresh orders after debounce');
-          fetchOrders();
-        }, 500);
+        // Directly update the state instead of calling fetch
+        // This ensures immediate UI update
+        if (payload.eventType === 'INSERT') {
+          setOrders(prev => [payload.new, ...prev]);
+        } else if (payload.eventType === 'UPDATE') {
+          setOrders(prev => prev.map(o => o.id === payload.new.id ? payload.new : o));
+        } else if (payload.eventType === 'DELETE') {
+          setOrders(prev => prev.filter(o => o.id !== payload.old.id));
+        }
       })
       .subscribe();
 
     // Real-time subscription for products
-    let productsFetchTimeout;
     const productsSub = adminSupabase
-      .channel('admin-products')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, () => {
-        clearTimeout(productsFetchTimeout);
-        productsFetchTimeout = setTimeout(() => fetchProducts(), 500);
+      .channel('admin-products-channel')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, (payload) => {
+        console.log('Product change detected:', payload);
+        if (payload.eventType === 'INSERT') {
+          setProducts(prev => [payload.new, ...prev]);
+        } else if (payload.eventType === 'UPDATE') {
+          setProducts(prev => prev.map(p => p.id === payload.new.id ? payload.new : p));
+        } else if (payload.eventType === 'DELETE') {
+          setProducts(prev => prev.filter(p => p.id !== payload.old.id));
+        }
       })
       .subscribe();
 
     // Real-time subscription for subscribers
-    let subscribersFetchTimeout;
     const subscribersSub = adminSupabase
-      .channel('admin-subscribers')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'newsletter_subscribers' }, () => {
-        clearTimeout(subscribersFetchTimeout);
-        subscribersFetchTimeout = setTimeout(() => fetchSubscribers(), 500);
+      .channel('admin-subscribers-channel')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'newsletter_subscribers' }, (payload) => {
+        console.log('Subscriber change detected:', payload);
+        if (payload.eventType === 'INSERT') {
+          setSubscribers(prev => [payload.new, ...prev]);
+        } else if (payload.eventType === 'UPDATE') {
+          setSubscribers(prev => prev.map(s => s.id === payload.new.id ? payload.new : s));
+        } else if (payload.eventType === 'DELETE') {
+          setSubscribers(prev => prev.filter(s => s.id !== payload.old.id));
+        }
       })
       .subscribe();
 
     return () => {
-      clearTimeout(ordersFetchTimeout);
-      clearTimeout(productsFetchTimeout);
-      clearTimeout(subscribersFetchTimeout);
       adminSupabase.removeChannel(ordersSub);
       adminSupabase.removeChannel(productsSub);
       adminSupabase.removeChannel(subscribersSub);
@@ -131,8 +141,10 @@ export function AdminDashboard({ user, onLogout }) {
         .select('*, order_items(*, products(*))')
         .order('created_at', { ascending: false });
       if (error) throw error;
+      console.log('Orders fetched:', data);
       setOrders(data || []);
     } catch (err) {
+      console.error('Fetch orders error:', err);
       showToast('Failed to load orders', 'error');
     } finally {
       setOrdersLoading(false);
@@ -214,8 +226,10 @@ export function AdminDashboard({ user, onLogout }) {
         .select('*')
         .order('subscribed_at', { ascending: false });
       if (error) throw error;
+      console.log('Subscribers fetched:', data);
       setSubscribers(data || []);
     } catch (err) {
+      console.error('Fetch subscribers error:', err);
       showToast('Failed to load subscribers', 'error');
     } finally {
       setSubscribersLoading(false);
@@ -243,8 +257,10 @@ export function AdminDashboard({ user, onLogout }) {
         .select('*')
         .order('created_at', { ascending: false });
       if (error) throw error;
+      console.log('Products fetched:', data);
       setProducts(data || []);
     } catch (err) {
+      console.error('Fetch products error:', err);
       showToast('Failed to load products', 'error');
     } finally {
       setLoading(false);
