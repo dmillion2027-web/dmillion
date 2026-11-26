@@ -69,13 +69,22 @@ export function AdminDashboard({ user, onLogout }) {
   // Effects
   useEffect(() => {
     // Initial load
+    console.log('AdminDashboard mounting - fetching initial data');
     fetchProducts();
     fetchOrders();
     fetchSubscribers();
 
+    // Poll every 3 seconds to ensure stats are up-to-date
+    const pollInterval = setInterval(() => {
+      console.log('Polling for updates');
+      fetchProducts();
+      fetchOrders();
+      fetchSubscribers();
+    }, 3000);
+
     // Real-time subscription for orders
     const ordersSub = adminSupabase
-      .channel('admin-orders-channel')
+      .channel('admin-orders-channel-' + Date.now())
       .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, (payload) => {
         console.log('Order change detected:', payload);
         // Directly update the state instead of calling fetch
@@ -88,11 +97,13 @@ export function AdminDashboard({ user, onLogout }) {
           setOrders(prev => prev.filter(o => o.id !== payload.old.id));
         }
       })
-      .subscribe();
+      .subscribe((status) => {
+        console.log('Orders subscription status:', status);
+      });
 
     // Real-time subscription for products
     const productsSub = adminSupabase
-      .channel('admin-products-channel')
+      .channel('admin-products-channel-' + Date.now())
       .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, (payload) => {
         console.log('Product change detected:', payload);
         if (payload.eventType === 'INSERT') {
@@ -103,11 +114,13 @@ export function AdminDashboard({ user, onLogout }) {
           setProducts(prev => prev.filter(p => p.id !== payload.old.id));
         }
       })
-      .subscribe();
+      .subscribe((status) => {
+        console.log('Products subscription status:', status);
+      });
 
     // Real-time subscription for subscribers
     const subscribersSub = adminSupabase
-      .channel('admin-subscribers-channel')
+      .channel('admin-subscribers-channel-' + Date.now())
       .on('postgres_changes', { event: '*', schema: 'public', table: 'newsletter_subscribers' }, (payload) => {
         console.log('Subscriber change detected:', payload);
         if (payload.eventType === 'INSERT') {
@@ -118,9 +131,12 @@ export function AdminDashboard({ user, onLogout }) {
           setSubscribers(prev => prev.filter(s => s.id !== payload.old.id));
         }
       })
-      .subscribe();
+      .subscribe((status) => {
+        console.log('Subscribers subscription status:', status);
+      });
 
     return () => {
+      clearInterval(pollInterval);
       adminSupabase.removeChannel(ordersSub);
       adminSupabase.removeChannel(productsSub);
       adminSupabase.removeChannel(subscribersSub);
