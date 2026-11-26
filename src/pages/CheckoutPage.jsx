@@ -124,7 +124,8 @@ export function CheckoutPage() {
 
       // Send order confirmation email
       try {
-        const emailResponse = await fetch('/api/send-order-email', {
+        const API_BASE = import.meta.env.VITE_API_URL || 'https://dmillion-web.vercel.app';
+        const emailResponse = await fetch(`${API_BASE}/api/send-order-email`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({

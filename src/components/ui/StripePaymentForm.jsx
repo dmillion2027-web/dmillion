@@ -10,6 +10,9 @@ export function StripePaymentForm({ total, orderId, shippingEmail, shippingName,
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  // API base URL - use Vercel API endpoint
+  const API_BASE = import.meta.env.VITE_API_URL || 'https://dmillion-web.vercel.app';
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -23,7 +26,7 @@ export function StripePaymentForm({ total, orderId, shippingEmail, shippingName,
 
     try {
       // 1. Create payment intent on backend
-      const intentResponse = await fetch('/api/create-payment-intent', {
+      const intentResponse = await fetch(`${API_BASE}/api/create-payment-intent`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

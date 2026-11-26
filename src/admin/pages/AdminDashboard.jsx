@@ -211,9 +211,10 @@ export function AdminDashboard({ user, onLogout }) {
       
       // Send status update email to customer
       try {
+        const API_BASE = import.meta.env.VITE_API_URL || 'https://dmillion-web.vercel.app';
         const order = orders.find(o => o.id === orderId);
         if (order && order.customer_email) {
-          await fetch('/api/send-order-status-email', {
+          await fetch(`${API_BASE}/api/send-order-status-email`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
