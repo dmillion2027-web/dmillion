@@ -73,17 +73,24 @@ export function AdminDashboard({ user, onLogout }) {
     fetchOrders();
     fetchSubscribers();
 
-    // Poll every 2 seconds - this WILL get the latest data
+    // Poll every 1 second - aggressive polling to ensure real-time updates
     const pollInterval = setInterval(() => {
       fetchProducts();
       fetchOrders();
       fetchSubscribers();
-    }, 2000);
+    }, 1000);
 
     return () => {
       clearInterval(pollInterval);
     };
   }, []);
+
+  // Additional effect to refresh when tab changes
+  useEffect(() => {
+    fetchProducts();
+    fetchOrders();
+    fetchSubscribers();
+  }, [activeTab]);
 
   // Handler Functions
   const showToast = (message, type = 'success') => {
