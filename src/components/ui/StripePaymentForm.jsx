@@ -29,6 +29,8 @@ export function StripePaymentForm({ total, orderId, shippingEmail, shippingName,
       const intentResponse = await fetch(`${API_BASE}/api/create-payment-intent`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'omit',
+        mode: 'cors',
         body: JSON.stringify({
           amount: total,
           orderId: orderId,

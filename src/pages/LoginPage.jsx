@@ -32,6 +32,17 @@ export function LoginPage() {
     }
   }, [user, navigate]);
 
+  // Handle session expired redirect
+  useEffect(() => {
+    const handleSessionExpired = () => {
+      setIsLogin(true); // Show login form
+      setError('');
+    };
+
+    window.addEventListener('session-expired', handleSessionExpired);
+    return () => window.removeEventListener('session-expired', handleSessionExpired);
+  }, []);
+
   const handleChange = (e) => {
     setFormData({
       ...formData,

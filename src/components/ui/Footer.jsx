@@ -18,29 +18,17 @@ export function Footer() {
   const footerLinks = {
     company: [
       { name: 'About Us', path: '/about' },
-      { name: 'Our Story', path: '/story' },
-      { name: 'Careers', path: '/careers' },
-      { name: 'Press', path: '/press' },
-      { name: 'Blog', path: '/blog' },
     ],
     shop: [
       { name: 'All Collection', path: '/collection' },
-      { name: 'New Arrivals', path: '/new-arrivals' },
-      { name: 'Best Sellers', path: '/best-sellers' },
-      { name: 'Gift Cards', path: '/gift-cards' },
-      { name: 'Sale', path: '/sale' },
     ],
     support: [
       { name: 'Contact Us', path: '/contact' },
-      { name: 'FAQs', path: '/faq' },
-      { name: 'Shipping Info', path: '/shipping' },
-      { name: 'Returns', path: '/returns' },
       { name: 'Track Order', path: '/track-order' },
     ],
     legal: [
       { name: 'Privacy Policy', path: '/privacy' },
       { name: 'Terms of Service', path: '/terms' },
-      { name: 'Cookie Policy', path: '/cookies' },
       { name: 'Accessibility', path: '/accessibility' },
     ],
   };

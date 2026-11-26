@@ -7,6 +7,7 @@ import { CustomCursor } from './components/ui/CustomCursor';
 import { Header } from './components/ui/Header';
 import { Footer } from './components/ui/Footer';
 import { SchemaMarkup } from './components/SchemaMarkup';
+import { SessionManager } from './components/SessionManager';
 import { Home } from './pages/Home';
 import { CollectionPage } from './pages/CollectionPage';
 import { AboutPage } from './pages/AboutPage';
@@ -27,6 +28,7 @@ function AppContent() {
     <Router>
       <SchemaMarkup />
       <CustomCursor />
+      <SessionManager />
       <div className="flex flex-col min-h-screen">
         <Header cartItemCount={getCartItemCount()} />
         <main className="flex-grow">
