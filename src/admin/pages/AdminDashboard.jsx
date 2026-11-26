@@ -69,74 +69,56 @@ export function AdminDashboard({ user, onLogout }) {
   // Effects
   useEffect(() => {
     // Initial load
-    console.log('AdminDashboard mounting - fetching initial data');
     fetchProducts();
     fetchOrders();
     fetchSubscribers();
 
-    // Poll every 3 seconds to ensure stats are up-to-date
-    const pollInterval = setInterval(() => {
-      console.log('Polling for updates');
-      fetchProducts();
-      fetchOrders();
-      fetchSubscribers();
-    }, 3000);
-
     // Real-time subscription for orders
     const ordersSub = adminSupabase
-      .channel('admin-orders-channel-' + Date.now())
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, (payload) => {
-        console.log('Order change detected:', payload);
-        // Directly update the state instead of calling fetch
-        // This ensures immediate UI update
-        if (payload.eventType === 'INSERT') {
-          setOrders(prev => [payload.new, ...prev]);
-        } else if (payload.eventType === 'UPDATE') {
-          setOrders(prev => prev.map(o => o.id === payload.new.id ? payload.new : o));
-        } else if (payload.eventType === 'DELETE') {
-          setOrders(prev => prev.filter(o => o.id !== payload.old.id));
+      .channel('orders')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'orders' },
+        (payload) => {
+          console.log('Order change detected:', payload);
+          fetchOrders();
         }
-      })
+      )
       .subscribe((status) => {
         console.log('Orders subscription status:', status);
       });
 
     // Real-time subscription for products
     const productsSub = adminSupabase
-      .channel('admin-products-channel-' + Date.now())
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, (payload) => {
-        console.log('Product change detected:', payload);
-        if (payload.eventType === 'INSERT') {
-          setProducts(prev => [payload.new, ...prev]);
-        } else if (payload.eventType === 'UPDATE') {
-          setProducts(prev => prev.map(p => p.id === payload.new.id ? payload.new : p));
-        } else if (payload.eventType === 'DELETE') {
-          setProducts(prev => prev.filter(p => p.id !== payload.old.id));
+      .channel('products')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'products' },
+        (payload) => {
+          console.log('Product change detected:', payload);
+          fetchProducts();
         }
-      })
+      )
       .subscribe((status) => {
         console.log('Products subscription status:', status);
       });
 
     // Real-time subscription for subscribers
     const subscribersSub = adminSupabase
-      .channel('admin-subscribers-channel-' + Date.now())
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'newsletter_subscribers' }, (payload) => {
-        console.log('Subscriber change detected:', payload);
-        if (payload.eventType === 'INSERT') {
-          setSubscribers(prev => [payload.new, ...prev]);
-        } else if (payload.eventType === 'UPDATE') {
-          setSubscribers(prev => prev.map(s => s.id === payload.new.id ? payload.new : s));
-        } else if (payload.eventType === 'DELETE') {
-          setSubscribers(prev => prev.filter(s => s.id !== payload.old.id));
+      .channel('subscribers')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'newsletter_subscribers' },
+        (payload) => {
+          console.log('Subscriber change detected:', payload);
+          fetchSubscribers();
         }
-      })
+      )
       .subscribe((status) => {
         console.log('Subscribers subscription status:', status);
       });
 
     return () => {
-      clearInterval(pollInterval);
       adminSupabase.removeChannel(ordersSub);
       adminSupabase.removeChannel(productsSub);
       adminSupabase.removeChannel(subscribersSub);
