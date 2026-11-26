@@ -73,55 +73,15 @@ export function AdminDashboard({ user, onLogout }) {
     fetchOrders();
     fetchSubscribers();
 
-    // Real-time subscription for orders
-    const ordersSub = adminSupabase
-      .channel('orders')
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'orders' },
-        (payload) => {
-          console.log('Order change detected:', payload);
-          fetchOrders();
-        }
-      )
-      .subscribe((status) => {
-        console.log('Orders subscription status:', status);
-      });
-
-    // Real-time subscription for products
-    const productsSub = adminSupabase
-      .channel('products')
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'products' },
-        (payload) => {
-          console.log('Product change detected:', payload);
-          fetchProducts();
-        }
-      )
-      .subscribe((status) => {
-        console.log('Products subscription status:', status);
-      });
-
-    // Real-time subscription for subscribers
-    const subscribersSub = adminSupabase
-      .channel('subscribers')
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'newsletter_subscribers' },
-        (payload) => {
-          console.log('Subscriber change detected:', payload);
-          fetchSubscribers();
-        }
-      )
-      .subscribe((status) => {
-        console.log('Subscribers subscription status:', status);
-      });
+    // Poll every 2 seconds - this WILL get the latest data
+    const pollInterval = setInterval(() => {
+      fetchProducts();
+      fetchOrders();
+      fetchSubscribers();
+    }, 2000);
 
     return () => {
-      adminSupabase.removeChannel(ordersSub);
-      adminSupabase.removeChannel(productsSub);
-      adminSupabase.removeChannel(subscribersSub);
+      clearInterval(pollInterval);
     };
   }, []);
 
@@ -638,8 +598,26 @@ export function AdminDashboard({ user, onLogout }) {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
               >
-                <h1 className="text-xl sm:text-2xl md:text-3xl font-bold mb-1 sm:mb-2 text-gray-900">Dashboard</h1>
-                <p className="text-gray-600 text-xs sm:text-sm mb-4 sm:mb-6">Manage your DMILLION product collection</p>
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <h1 className="text-xl sm:text-2xl md:text-3xl font-bold mb-1 sm:mb-2 text-gray-900">Dashboard</h1>
+                    <p className="text-gray-600 text-xs sm:text-sm">Manage your DMILLION product collection</p>
+                  </div>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => {
+                      fetchProducts();
+                      fetchOrders();
+                      fetchSubscribers();
+                      showToast('Data refreshed!');
+                    }}
+                    className="flex items-center space-x-2 px-3 sm:px-4 py-2 sm:py-2.5 bg-[#e8d5b7] text-black rounded-lg hover:bg-[#f0e5d8] text-xs sm:text-sm font-medium transition-colors"
+                  >
+                    <RefreshCw className="w-4 h-4" />
+                    <span>Refresh</span>
+                  </motion.button>
+                </div>
 
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 md:gap-4 mb-6 sm:mb-8">
                   {[
