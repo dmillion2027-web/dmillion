@@ -106,6 +106,63 @@ export function AdminDashboard({ user, onLogout }) {
     };
   }, [user, activeTab]);
 
+  // Real-time subscriptions for live data
+  useEffect(() => {
+    console.log('Setting up real-time subscriptions');
+
+    // Subscribe to orders changes in real-time
+    const ordersChannel = adminSupabase
+      .channel('public:orders')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'orders' },
+        (payload) => {
+          console.log('Real-time order event:', payload.eventType);
+          fetchOrders();
+        }
+      )
+      .subscribe((status) => {
+        console.log('Orders channel subscription status:', status);
+      });
+
+    // Subscribe to products changes in real-time
+    const productsChannel = adminSupabase
+      .channel('public:products')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'products' },
+        (payload) => {
+          console.log('Real-time product event:', payload.eventType);
+          fetchProducts();
+        }
+      )
+      .subscribe((status) => {
+        console.log('Products channel subscription status:', status);
+      });
+
+    // Subscribe to subscribers changes in real-time
+    const subscribersChannel = adminSupabase
+      .channel('public:newsletter_subscribers')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'newsletter_subscribers' },
+        (payload) => {
+          console.log('Real-time subscriber event:', payload.eventType);
+          fetchSubscribers();
+        }
+      )
+      .subscribe((status) => {
+        console.log('Subscribers channel subscription status:', status);
+      });
+
+    return () => {
+      console.log('Cleaning up real-time subscriptions');
+      ordersChannel.unsubscribe();
+      productsChannel.unsubscribe();
+      subscribersChannel.unsubscribe();
+    };
+  }, [user]);
+
   // Additional effect to refresh when tab changes
   useEffect(() => {
     fetchProducts();
