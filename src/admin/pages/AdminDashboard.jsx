@@ -76,10 +76,13 @@ export function AdminDashboard({ user, onLogout }) {
     setOrders([]);
     setSubscribers([]);
     
-    // Then fetch fresh data immediately
-    fetchProducts();
-    fetchOrders();
-    fetchSubscribers();
+    // Then fetch fresh data with a longer delay to let connection establish
+    const fetchTimeout = setTimeout(() => {
+      console.log('Fetching fresh data after delay');
+      fetchProducts();
+      fetchOrders();
+      fetchSubscribers();
+    }, 300);
 
     // Poll every 2 seconds for real-time feel
     const pollInterval = setInterval(() => {
@@ -89,6 +92,7 @@ export function AdminDashboard({ user, onLogout }) {
     }, 2000);
 
     return () => {
+      clearTimeout(fetchTimeout);
       clearInterval(pollInterval);
     };
   }, [user, activeTab]);
@@ -167,15 +171,18 @@ export function AdminDashboard({ user, onLogout }) {
   const fetchOrders = async () => {
     setOrdersLoading(true);
     try {
+      // Force fresh data by adding a cache buster query param
+      const cacheBuster = `?t=${Date.now()}`;
       const { data, error, status } = await adminSupabase
         .from('orders')
         .select('*, order_items(*, products(*))')
         .order('created_at', { ascending: false });
+      
       if (error) {
         console.error('Fetch orders error:', error);
         throw error;
       }
-      console.log('Orders fetched - status:', status, 'count:', data?.length || 0);
+      console.log('Orders fetched - status:', status, 'count:', data?.length || 0, 'timestamp:', new Date().toISOString());
       setOrders(data || []);
     } catch (err) {
       console.error('Fetch orders failed:', err);
