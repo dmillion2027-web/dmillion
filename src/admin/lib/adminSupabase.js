@@ -16,10 +16,16 @@ function getAdminSupabase() {
       },
       global: {
         headers: {
-          // Disable HTTP caching
+          // Disable HTTP caching - force fresh data
           'Cache-Control': 'no-cache, no-store, must-revalidate',
           'Pragma': 'no-cache',
           'Expires': '0',
+        },
+      },
+      // Disable query cache at the client level
+      realtime: {
+        params: {
+          eventsPerSecond: 10,
         },
       },
     });

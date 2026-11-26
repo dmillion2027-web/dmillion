@@ -68,8 +68,8 @@ export function AdminDashboard({ user, onLogout }) {
 
   // Effects
   useEffect(() => {
-    // Force a hard refresh on mount to clear any cached data from login
-    console.log('AdminDashboard mounted - forcing fresh data load');
+    // Force a hard refresh on mount OR when user changes
+    console.log('AdminDashboard mounted/user changed - forcing fresh data load', user?.email);
     
     // Clear any existing state first
     setProducts([]);
@@ -104,7 +104,7 @@ export function AdminDashboard({ user, onLogout }) {
       clearInterval(pollInterval);
       clearInterval(ordersPollingInterval);
     };
-  }, [activeTab]);
+  }, [user, activeTab]);
 
   // Additional effect to refresh when tab changes
   useEffect(() => {
@@ -122,15 +122,18 @@ export function AdminDashboard({ user, onLogout }) {
   const fetchOrders = async () => {
     setOrdersLoading(true);
     try {
-      const { data, error } = await adminSupabase
+      const { data, error, status } = await adminSupabase
         .from('orders')
         .select('*, order_items(*, products(*))')
         .order('created_at', { ascending: false });
-      if (error) throw error;
-      console.log('Orders fetched:', data?.length || 0, 'orders');
+      if (error) {
+        console.error('Fetch orders error:', error);
+        throw error;
+      }
+      console.log('Orders fetched - status:', status, 'count:', data?.length || 0);
       setOrders(data || []);
     } catch (err) {
-      console.error('Fetch orders error:', err);
+      console.error('Fetch orders failed:', err);
       showToast('Failed to load orders', 'error');
     } finally {
       setOrdersLoading(false);
