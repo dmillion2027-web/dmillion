@@ -73,17 +73,28 @@ export function AdminDashboard({ user, onLogout }) {
     fetchOrders();
     fetchSubscribers();
 
-    // Poll every 1 second - aggressive polling to ensure real-time updates
+    // Poll every 1 second for overview/products/subscribers tabs
     const pollInterval = setInterval(() => {
-      fetchProducts();
-      fetchOrders();
-      fetchSubscribers();
+      // Don't poll aggressively if on orders tab
+      if (activeTab !== 'orders') {
+        fetchProducts();
+        fetchOrders();
+        fetchSubscribers();
+      }
     }, 1000);
+
+    // Separate polling for orders tab - 30 seconds to be unnoticeable
+    const ordersPollingInterval = setInterval(() => {
+      if (activeTab === 'orders') {
+        fetchOrders();
+      }
+    }, 30000);
 
     return () => {
       clearInterval(pollInterval);
+      clearInterval(ordersPollingInterval);
     };
-  }, []);
+  }, [activeTab]);
 
   // Additional effect to refresh when tab changes
   useEffect(() => {
