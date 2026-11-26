@@ -68,10 +68,20 @@ export function AdminDashboard({ user, onLogout }) {
 
   // Effects
   useEffect(() => {
-    // Initial load
-    fetchProducts();
-    fetchOrders();
-    fetchSubscribers();
+    // Force a hard refresh on mount to clear any cached data from login
+    console.log('AdminDashboard mounted - forcing fresh data load');
+    
+    // Clear any existing state first
+    setProducts([]);
+    setOrders([]);
+    setSubscribers([]);
+    
+    // Then fetch fresh data
+    setTimeout(() => {
+      fetchProducts();
+      fetchOrders();
+      fetchSubscribers();
+    }, 100);
 
     // Poll every 1 second for overview/products/subscribers tabs
     const pollInterval = setInterval(() => {
