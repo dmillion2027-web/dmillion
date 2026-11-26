@@ -76,90 +76,78 @@ export function AdminDashboard({ user, onLogout }) {
     setOrders([]);
     setSubscribers([]);
     
-    // Then fetch fresh data
-    setTimeout(() => {
+    // Then fetch fresh data immediately
+    fetchProducts();
+    fetchOrders();
+    fetchSubscribers();
+
+    // Poll every 2 seconds for real-time feel
+    const pollInterval = setInterval(() => {
       fetchProducts();
       fetchOrders();
       fetchSubscribers();
-    }, 100);
-
-    // Poll every 1 second for overview/products/subscribers tabs
-    const pollInterval = setInterval(() => {
-      // Don't poll aggressively if on orders tab
-      if (activeTab !== 'orders') {
-        fetchProducts();
-        fetchOrders();
-        fetchSubscribers();
-      }
-    }, 1000);
-
-    // Separate polling for orders tab - 30 seconds to be unnoticeable
-    const ordersPollingInterval = setInterval(() => {
-      if (activeTab === 'orders') {
-        fetchOrders();
-      }
-    }, 30000);
+    }, 2000);
 
     return () => {
       clearInterval(pollInterval);
-      clearInterval(ordersPollingInterval);
     };
   }, [user, activeTab]);
 
   // Real-time subscriptions for live data
   useEffect(() => {
-    console.log('Setting up real-time subscriptions');
+    console.log('Setting up real-time subscriptions for user:', user?.email);
 
     // Subscribe to orders changes in real-time
     const ordersChannel = adminSupabase
-      .channel('public:orders')
+      .channel('orders-changes', { config: { broadcast: { self: true } } })
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'orders' },
         (payload) => {
-          console.log('Real-time order event:', payload.eventType);
-          fetchOrders();
+          console.log('Real-time order event detected:', payload.eventType, payload);
+          setTimeout(() => fetchOrders(), 100);
         }
       )
-      .subscribe((status) => {
-        console.log('Orders channel subscription status:', status);
+      .subscribe((status, err) => {
+        console.log('Orders subscription status:', status, err);
       });
 
     // Subscribe to products changes in real-time
     const productsChannel = adminSupabase
-      .channel('public:products')
+      .channel('products-changes', { config: { broadcast: { self: true } } })
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'products' },
         (payload) => {
-          console.log('Real-time product event:', payload.eventType);
-          fetchProducts();
+          console.log('Real-time product event detected:', payload.eventType, payload);
+          setTimeout(() => fetchProducts(), 100);
         }
       )
-      .subscribe((status) => {
-        console.log('Products channel subscription status:', status);
+      .subscribe((status, err) => {
+        console.log('Products subscription status:', status, err);
       });
 
     // Subscribe to subscribers changes in real-time
     const subscribersChannel = adminSupabase
-      .channel('public:newsletter_subscribers')
+      .channel('subscribers-changes', { config: { broadcast: { self: true } } })
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'newsletter_subscribers' },
         (payload) => {
-          console.log('Real-time subscriber event:', payload.eventType);
-          fetchSubscribers();
+          console.log('Real-time subscriber event detected:', payload.eventType, payload);
+          setTimeout(() => fetchSubscribers(), 100);
         }
       )
-      .subscribe((status) => {
-        console.log('Subscribers channel subscription status:', status);
+      .subscribe((status, err) => {
+        console.log('Subscribers subscription status:', status, err);
       });
 
+    // Cleanup subscriptions
     return () => {
       console.log('Cleaning up real-time subscriptions');
-      ordersChannel.unsubscribe();
-      productsChannel.unsubscribe();
-      subscribersChannel.unsubscribe();
+      adminSupabase.removeChannel(ordersChannel);
+      adminSupabase.removeChannel(productsChannel);
+      adminSupabase.removeChannel(subscribersChannel);
     };
   }, [user]);
 
