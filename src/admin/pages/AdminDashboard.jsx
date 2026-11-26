@@ -117,7 +117,7 @@ export function AdminDashboard({ user, onLogout }) {
         .select('*, order_items(*, products(*))')
         .order('created_at', { ascending: false });
       if (error) throw error;
-      console.log('Orders fetched:', data);
+      console.log('Orders fetched:', data?.length || 0, 'orders');
       setOrders(data || []);
     } catch (err) {
       console.error('Fetch orders error:', err);
